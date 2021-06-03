@@ -18,7 +18,7 @@ public class ServerApp {
             server.createContext("/login", new LoginHandler(dm));
             server.createContext("/getImages", new GetImagesHandler(rm));
             server.createContext("/getSingleImage", new GetSingleImageHandler(rm));
-            server.createContext("/deleteImage", new DeleteImageHandler(rm));
+            server.createContext("/deleteImage", new DeleteImageHandler(rm, dm));
             server.createContext("/sendImage", new SendImageHandler(rm));
             server.createContext("/getUsers", new GetUsersHandler(dm));
             server.createContext("/getSingleUser", new GetSingleUserHandler(dm));
