@@ -53,11 +53,24 @@ public class GalleryView extends JFrame implements ActionListener {
         dm.addAll(imageIcons);
         setLocationAndSize();
         panel.setViewportView(jList);
-        add(uploadButton);
-        add(deleteButton);
-        add(browseButton);
-        add(addButton);
+        panel.setBounds(5, 5, WIDTH + 25, 700);
+        JPanel gridPanel = new JPanel(new GridLayout(10, 2, 30, 40));
+        gridPanel.add(new JLabel(""));
+        gridPanel.add(new JLabel(""));
+        gridPanel.add(new JLabel(""));
+        gridPanel.add(new JLabel(""));
+        gridPanel.add(new JLabel(""));
+        gridPanel.add(new JLabel(""));
+        gridPanel.add(new JLabel(""));
+        gridPanel.add(new JLabel(""));
+        gridPanel.add(uploadButton);
+        gridPanel.add(deleteButton);
+        gridPanel.add(browseButton);
+        gridPanel.add(addButton);
+        //gridPanel.setBorder(BorderFactory.createTitledBorder("Actions"));
+        setLayout(new GridLayout(1, 2, 5, 5));
         add(panel);
+        add(gridPanel);
     }
 
     private void setLocationAndSize(){

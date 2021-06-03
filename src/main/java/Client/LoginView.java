@@ -99,6 +99,7 @@ public class LoginView extends JFrame implements ActionListener {
                     .proxy(ProxySelector.of(new InetSocketAddress(8080)))
                     .build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println(response.body());
             return response.body();
         } catch (JSONException | URISyntaxException ex){
             System.err.println(ex);
@@ -113,9 +114,10 @@ public class LoginView extends JFrame implements ActionListener {
     private void initGallery(String key){
         GalleryView galleryView = new GalleryView(key);
 
-        galleryView.setSize(500, 450);
+        galleryView.setSize(700, 750);
         galleryView.setVisible(true);
         galleryView.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         galleryView.setLocationRelativeTo(null);
     }
 }
+
