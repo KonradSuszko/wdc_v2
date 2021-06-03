@@ -179,20 +179,22 @@ public class GalleryView extends JFrame implements ActionListener {
         if(index == -1){
             return;
         }
-        dm.remove(index);
+
         try{
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI("http://localhost:8080/deleteImage?index=" + index.toString()))
                     .header("Content-Type", "application/json;charset=UTF-8")
-                    .header("Authorization", "Bearer " + key)
+                    .header("Token", key)
                     .GET()
                     .build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            Optional<String> newToken = response.headers().firstValue("Token");
-            if(newToken.isPresent()){
-                this.key = newToken.get();
-            }
             System.out.println(response.body());
+            String answer = response.body();
+            if(answer.equals("ok"))
+                dm.remove(index);
+            else if(answer.equals("Access denied")){
+                // access denied error 403
+            }
         } catch (Exception ex){
             System.err.println(ex);
         }
