@@ -20,6 +20,10 @@ public class ServerApp {
             server.createContext("/getSingleImage", new GetSingleImageHandler(rm));
             server.createContext("/deleteImage", new DeleteImageHandler(rm));
             server.createContext("/sendImage", new SendImageHandler(rm));
+            server.createContext("/getUsers", new GetUsersHandler(dm));
+            server.createContext("/getSingleUser", new GetSingleUserHandler(dm));
+            server.createContext("/deleteUser", new DeleteUserHandler(dm));
+            server.createContext("/addUser", new AddUserHandler(dm));
             server.setExecutor(null);
             System.out.println("Starting...");
             server.start();

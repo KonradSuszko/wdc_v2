@@ -22,23 +22,25 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Gallery extends JFrame implements ActionListener {
+public class GalleryView extends JFrame implements ActionListener {
     private static final int WIDTH = 300;
     private static final int HEIGHT = 256;
 
-    HttpClient client;
+    private HttpClient client;
+    private String key;
 
     JScrollPane panel = new JScrollPane();
     JButton deleteButton = new JButton("DELETE");
     JButton uploadButton = new JButton("UPLOAD");
+    JButton browseButton = new JButton("BROWSE");
+    JButton addButton = new JButton("ADD USER");
     DefaultListModel dm = new DefaultListModel();
     JList jList = new JList();
 
     private List<ImageIcon> imageIcons = new ArrayList<>();
 
-    private String key;
 
-    public Gallery(String key) throws HeadlessException{
+    public GalleryView(String key) throws HeadlessException{
         this.key = key;
         this.client = HttpClient
                 .newBuilder()
@@ -53,17 +55,23 @@ public class Gallery extends JFrame implements ActionListener {
         panel.setViewportView(jList);
         add(uploadButton);
         add(deleteButton);
+        add(browseButton);
+        add(addButton);
         add(panel);
     }
 
     private void setLocationAndSize(){
         deleteButton.setBounds(350, 50, 100, 30);
         uploadButton.setBounds(350, 100, 100, 30);
+        browseButton.setBounds(350, 150, 100, 30);
+        addButton.setBounds(350, 200, 100, 30);
         jList.setBounds(5, 5, WIDTH + 25, imageIcons.size() * HEIGHT + 10);
     }
     private void addAction(){
         this.deleteButton.addActionListener(this);
         this.uploadButton.addActionListener(this);
+        browseButton.addActionListener(this);
+        addButton.addActionListener(this);
     }
 
     private List<byte[]> getFilesInBytes(){
@@ -71,7 +79,7 @@ public class Gallery extends JFrame implements ActionListener {
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI("http://localhost:8080/getImages"))
-                    .headers("Content-Type", "application/json;charset=UTF-8")
+                    .header("Content-Type", "application/json;charset=UTF-8")
                     .POST(HttpRequest.BodyPublishers.ofString(key))
                     .build();
             HttpResponse<byte[]> response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
@@ -79,7 +87,7 @@ public class Gallery extends JFrame implements ActionListener {
             for (Integer i = 0; i < n; i++) {
                 HttpRequest tmpReq = HttpRequest.newBuilder()
                         .uri(new URI("http://localhost:8080/getSingleImage?i=" + i.toString()))
-                        .headers("Content-Type", "application/json;charset=UTF-8")
+                        .header("Content-Type", "application/json;charset=UTF-8")
                         .GET()
                         .build();
                 HttpResponse<byte[]> tmpResponse = HttpClient.newBuilder()
@@ -114,6 +122,12 @@ public class Gallery extends JFrame implements ActionListener {
         }
         else if(e.getSource() == uploadButton){
             proceedUpload();
+        }
+        else if(e.getSource() == browseButton){
+            proceedBrowse();
+        }
+        else if(e.getSource() == addButton){
+            proceedAdd();
         }
     }
 
@@ -169,6 +183,14 @@ public class Gallery extends JFrame implements ActionListener {
         } catch (IOException | URISyntaxException | InterruptedException ex){
             System.err.println(ex);
         }
+    }
+
+    private void proceedBrowse(){
+        new BrowseUsersView(key);
+    }
+
+    private void proceedAdd(){
+        new AddUserView(key);
     }
 
 

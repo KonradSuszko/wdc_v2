@@ -53,7 +53,7 @@ public class LoginHandler implements HttpHandler {
                         .setId(username)
                         .setIssuedAt(now)
                         .setExpiration(Date.from(Instant.ofEpochMilli(now.getTime() + TimeUnit.HOURS.toMillis(2))))
-                        .signWith(SignatureAlgorithm.HS256, TextCodec.BASE64.decode(SECRET))
+                        .signWith(SignatureAlgorithm.HS256, TextCodec.BASE64.encode(SECRET)) //decode?
                         .compact();
                 System.out.println(jws);
                 manager.updateToken(user.getId(), jws);
@@ -67,6 +67,7 @@ public class LoginHandler implements HttpHandler {
             OutputStream os = exchange.getResponseBody();
             os.write(response.getBytes(StandardCharsets.UTF_8));
             os.close();
+            inputStream.close();
         } catch (JSONException ex){
             System.out.println(ex.getMessage());
         }

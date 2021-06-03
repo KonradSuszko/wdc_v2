@@ -16,10 +16,9 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.Base64;
 
-public class LoginFrame extends JFrame implements ActionListener {
+public class LoginView extends JFrame implements ActionListener {
     Container container = getContentPane();
     JLabel userLabel = new JLabel("USERNAME");
     JLabel passwordLabel = new JLabel("PASSWORD");
@@ -27,7 +26,7 @@ public class LoginFrame extends JFrame implements ActionListener {
     JPasswordField passwordField = new JPasswordField();
     JButton loginButton = new JButton("LOGIN");
 
-    public LoginFrame() throws HeadlessException{
+    public LoginView() throws HeadlessException{
         setLayoutManager();
         setLocationAndSize();
         addComponentsToContainer();
@@ -46,7 +45,7 @@ public class LoginFrame extends JFrame implements ActionListener {
         loginButton.setBounds(200, 150, 100, 30);
     }
 
-    public void addComponentsToContainer() {
+    private void addComponentsToContainer() {
         container.add(userLabel);
         container.add(passwordLabel);
         container.add(userField);
@@ -54,7 +53,7 @@ public class LoginFrame extends JFrame implements ActionListener {
         container.add(loginButton);
     }
 
-    public void addAction() {
+    private void addAction() {
         loginButton.addActionListener(this);
     }
 
@@ -75,6 +74,8 @@ public class LoginFrame extends JFrame implements ActionListener {
                 JOptionPane.showMessageDialog(this,"Logged");
                 initGallery(tmp);
             }
+            userField.setText("");
+            passwordField.setText("");
         }
     }
 
@@ -110,11 +111,11 @@ public class LoginFrame extends JFrame implements ActionListener {
     }
 
     private void initGallery(String key){
-        Gallery gallery = new Gallery(key);
+        GalleryView galleryView = new GalleryView(key);
 
-        gallery.setSize(500, 450);
-        gallery.setVisible(true);
-        gallery.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        gallery.setLocationRelativeTo(null);
+        galleryView.setSize(500, 450);
+        galleryView.setVisible(true);
+        galleryView.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        galleryView.setLocationRelativeTo(null);
     }
 }
