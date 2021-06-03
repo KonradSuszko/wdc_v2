@@ -21,10 +21,10 @@ public class User {
 
     private String hashedPassword;
 
-    @ElementCollection
+    @ElementCollection//(fetch = FetchType.EAGER)
     private List<Role> roles;
 
-    @ElementCollection
+    @ElementCollection//(fetch = FetchType.EAGER)
     private List<Policy> policies;
 
     private String lastToken;

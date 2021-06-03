@@ -27,11 +27,14 @@ public class DatabaseManager {
         em.persist(user);
         transaction.commit();
         em.close();
+        System.out.println("added");
     }
 
     public User find(int id) throws NullPointerException{
         EntityManager em = emf.createEntityManager();
+        System.out.println("starting finding id=" + id);
         User user = em.find(clazz, id);
+        System.out.println("found");
         em.close();
         return user;
     }
@@ -59,6 +62,7 @@ public class DatabaseManager {
         List<User> users = em.createQuery("select u from User u", User.class)
                 .getResultList();
         em.close();
+        System.out.println("users found");
         return users;
     }
 

@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.persistence.Persistence;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -18,13 +19,14 @@ public class GetSingleUserHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
+        System.out.println("\nHandling single user \n");
         String query = exchange.getRequestURI().getQuery();
         String[] e = query.split("=");
         Integer id = Integer.parseInt(e[1]);
-
         User user = dm.find(id);
         try {
             String response = buildJSON(user).toString();
+            System.out.println(response);
             OutputStream os = exchange.getResponseBody();
             exchange.sendResponseHeaders(200, response.getBytes(StandardCharsets.UTF_8).length);
             os.write(response.getBytes(StandardCharsets.UTF_8));
@@ -38,8 +40,8 @@ public class GetSingleUserHandler implements HttpHandler {
     private JSONObject buildJSON(User user) throws JSONException {
         return new JSONObject()
                 .put("id", user.getId().toString())
-                .put("username", user.getUsername())
-                .put("highestRole", user.getHighestRole())
-                .put("highestPolicy", user.getHighestPolicy());
+                .put("username", user.getUsername());
+                /*.put("highestRole", user.getHighestRole())
+                .put("highestPolicy", user.getHighestPolicy());*/
     }
 }

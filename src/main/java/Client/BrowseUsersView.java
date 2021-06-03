@@ -86,7 +86,7 @@ public class BrowseUsersView extends JFrame implements ActionListener {
                 tmp[3] = allBytes[(i+1)*4 + 3];
                 integers[i] = ByteBuffer.wrap(tmp).getInt();
             }
-
+            System.out.println(n);
 
             for(Integer i = 0; i < n; i++) {
 
@@ -95,16 +95,18 @@ public class BrowseUsersView extends JFrame implements ActionListener {
                         .header("Content-Type", "application/json;charset=UTF-8")
                         .GET()
                         .build();
+                System.out.println(i);
                 HttpResponse<String> tmpResponse = client.send(tmpReq, HttpResponse.BodyHandlers.ofString());
                 JSONTokener tokener = new JSONTokener(tmpResponse.body());
                 JSONObject json = new JSONObject(tokener);
 
                 String id = json.getString("id");
                 String username = json.getString("username");
-                String highestRole = json.getString("highestRole");
-                String highestPolicy = json.getString("highestPolicy");
-                System.out.println(id + "\t" + username + "\t" + highestRole + "\t" + highestPolicy);
-                result.add(id + "\t" + username + "\t" + highestRole + "\t" + highestPolicy);
+//                String highestRole = json.getString("highestRole");
+//                String highestPolicy = json.getString("highestPolicy");
+//                System.out.println(id + "\t" + username + "\t" + highestRole + "\t" + highestPolicy);
+//                result.add(id + "\t" + username + "\t" + highestRole + "\t" + highestPolicy);
+                result.add(id + "              " + username);
             }
         } catch (URISyntaxException ex){
             System.err.println(ex);
