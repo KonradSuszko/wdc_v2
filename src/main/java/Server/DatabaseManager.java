@@ -78,8 +78,7 @@ public class DatabaseManager {
     public void generateSampleData(){
         User user1 = new User("admin",
                 Base64.getEncoder().encodeToString("admin".getBytes(StandardCharsets.UTF_8)),
-                new ArrayList<>(List.of(Role.ADMIN, Role.STUFF, Role.USER)),
-                new ArrayList<>(List.of(Policy.AccessLevel5)));
+                Role.ADMIN, Policy.AccessLevel5);
         add(user1);
     }
 
