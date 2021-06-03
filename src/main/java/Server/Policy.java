@@ -1,5 +1,8 @@
 package Server;
 
+import lombok.ToString;
+
+@ToString
 public enum Policy {
     AccessLevel1,
     AccessLevel2,

@@ -56,7 +56,7 @@ public class DatabaseManager {
 
     public List<User> findAll(){
         EntityManager em = emf.createEntityManager();
-        List<User> users = em.createQuery("select u from User", User.class)
+        List<User> users = em.createQuery("select u from User u", User.class)
                 .getResultList();
         em.close();
         return users;

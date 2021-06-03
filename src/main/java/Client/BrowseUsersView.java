@@ -16,6 +16,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.ByteBuffer;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,9 +33,9 @@ public class BrowseUsersView extends JFrame implements ActionListener {
 
     public BrowseUsersView(String key) {
         this.key = key;
-        this.client = HttpClient
-                .newBuilder()
+        client = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_1_1)
+                .connectTimeout(Duration.ofSeconds(15))
                 .proxy(ProxySelector.of(new InetSocketAddress(8080)))
                 .build();
 
@@ -51,7 +52,7 @@ public class BrowseUsersView extends JFrame implements ActionListener {
 
     private void setLocationAndSize(){
         this.setSize(300, 300);
-        this.setFocusable(true);
+        this.setVisible(true);
 
         deleteButton.setBounds(350, 40, 100, 30);
     }
@@ -102,6 +103,7 @@ public class BrowseUsersView extends JFrame implements ActionListener {
                 String username = json.getString("username");
                 String highestRole = json.getString("highestRole");
                 String highestPolicy = json.getString("highestPolicy");
+                System.out.println(id + "\t" + username + "\t" + highestRole + "\t" + highestPolicy);
                 result.add(id + "\t" + username + "\t" + highestRole + "\t" + highestPolicy);
             }
         } catch (URISyntaxException ex){
