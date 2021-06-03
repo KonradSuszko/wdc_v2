@@ -19,10 +19,13 @@ import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class BrowseUsersView extends JFrame implements ActionListener {
     private HttpClient client;
     private String key;
+
+    private GalleryView parent;
 
     private JScrollPane scrollPane = new JScrollPane();
     private JButton deleteButton = new JButton("DELETE");
@@ -31,8 +34,9 @@ public class BrowseUsersView extends JFrame implements ActionListener {
 
     private List<String> combinedStrings;
 
-    public BrowseUsersView(String key) {
+    public BrowseUsersView(String key, GalleryView parent) {
         this.key = key;
+        this.parent = parent;
         client = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_1_1)
                 .connectTimeout(Duration.ofSeconds(15))
@@ -54,7 +58,7 @@ public class BrowseUsersView extends JFrame implements ActionListener {
         this.setSize(300, 300);
         this.setVisible(true);
 
-        deleteButton.setBounds(350, 40, 100, 30);
+        deleteButton.setBounds(175, 200, 100, 30);
     }
 
     private void addAction(){
@@ -67,46 +71,68 @@ public class BrowseUsersView extends JFrame implements ActionListener {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI("http://localhost:8080/getUsers"))
                     .header("Content-Type", "application/json;charset=UTF-8")
+                    .header("Authorization", "Bearer " + key)
                     .GET()
                     .build();
             HttpResponse<byte[]> response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
-            byte[] allBytes = response.body();
-            byte[] nBytes = new byte[4];
-            nBytes[0] = allBytes[0];
-            nBytes[1] = allBytes[1];
-            nBytes[2] = allBytes[2];
-            nBytes[3] = allBytes[3];
-            Integer n = ByteBuffer.wrap(nBytes).getInt();
-            Integer[] integers = new Integer[n];
-            for(int i = 0; i < n; i++){
-                byte[] tmp = new byte[4];
-                tmp[0] = allBytes[(i+1)*4];
-                tmp[1] = allBytes[(i+1)*4 + 1];
-                tmp[2] = allBytes[(i+1)*4 + 2];
-                tmp[3] = allBytes[(i+1)*4 + 3];
-                integers[i] = ByteBuffer.wrap(tmp).getInt();
+            if(response.statusCode() == 403) {
+                JOptionPane.showMessageDialog(this, "Forbidden access");
+                return result;
             }
-            System.out.println(n);
+            else if (response.statusCode() == 200) {
+                Optional<String> newToken = response.headers().firstValue("Token");
+                newToken.ifPresent(this::updateToken);
+                byte[] allBytes = response.body();
+                byte[] nBytes = new byte[4];
+                nBytes[0] = allBytes[0];
+                nBytes[1] = allBytes[1];
+                nBytes[2] = allBytes[2];
+                nBytes[3] = allBytes[3];
+                Integer n = ByteBuffer.wrap(nBytes).getInt();
+                Integer[] integers = new Integer[n];
+                for (int i = 0; i < n; i++) {
+                    byte[] tmp = new byte[4];
+                    tmp[0] = allBytes[(i + 1) * 4];
+                    tmp[1] = allBytes[(i + 1) * 4 + 1];
+                    tmp[2] = allBytes[(i + 1) * 4 + 2];
+                    tmp[3] = allBytes[(i + 1) * 4 + 3];
+                    integers[i] = ByteBuffer.wrap(tmp).getInt();
+                }
 
-            for(Integer i = 0; i < n; i++) {
+                for (Integer i = 0; i < n; i++) {
 
-                HttpRequest tmpReq = HttpRequest.newBuilder()
-                        .uri(new URI("http://localhost:8080/getSingleUser?i=" + integers[i].toString()))
-                        .header("Content-Type", "application/json;charset=UTF-8")
-                        .GET()
-                        .build();
-                System.out.println(i);
-                HttpResponse<String> tmpResponse = client.send(tmpReq, HttpResponse.BodyHandlers.ofString());
-                JSONTokener tokener = new JSONTokener(tmpResponse.body());
-                JSONObject json = new JSONObject(tokener);
+                    HttpRequest tmpReq = HttpRequest.newBuilder()
+                            .uri(new URI("http://localhost:8080/getSingleUser?i=" + integers[i].toString()))
+                            .header("Content-Type", "application/json;charset=UTF-8")
+                            .header("Authorization", "Bearer " + key)
+                            .GET()
+                            .build();
+                    HttpResponse<String> tmpResponse = client.send(tmpReq, HttpResponse.BodyHandlers.ofString());
 
-                String id = json.getString("id");
-                String username = json.getString("username");
+                    if (response.statusCode() == 403) {
+                        JOptionPane.showMessageDialog(this, "Forbidden access");
+                        break;
+                    } else if (response.statusCode() == 200) {
+                        newToken = response.headers().firstValue("Token");
+                        newToken.ifPresent(this::updateToken);
+                        JSONTokener tokener = new JSONTokener(tmpResponse.body());
+                        JSONObject json = new JSONObject(tokener);
+
+                        String id = json.getString("id");
+                        String username = json.getString("username");
 //                String highestRole = json.getString("highestRole");
 //                String highestPolicy = json.getString("highestPolicy");
 //                System.out.println(id + "\t" + username + "\t" + highestRole + "\t" + highestPolicy);
 //                result.add(id + "\t" + username + "\t" + highestRole + "\t" + highestPolicy);
-                result.add(id + "              " + username);
+                        result.add(id + "              " + username);
+                    } else {
+                        System.out.println("Error with " + i + " user");
+                    }
+                }
+            }
+            else{
+                JOptionPane.showMessageDialog(this, "Unknown error");
+                return result;
             }
         } catch (URISyntaxException ex){
             System.err.println(ex);
@@ -120,6 +146,11 @@ public class BrowseUsersView extends JFrame implements ActionListener {
 
         return result;
 
+    }
+
+    private void updateToken(String token){
+        this.key = token;
+        parent.updateToken(token);
     }
 
     @Override
@@ -137,11 +168,21 @@ public class BrowseUsersView extends JFrame implements ActionListener {
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(new URI("http://localhost:8080/deleteUser?id=" + id.toString()))
                         .header("Content-Type", "application/json;charset=UTF-8")
-                        .header("Token", key)
+                        .header("Authorization", "Bearer " + key)
                         .GET()
                         .build();
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-                System.out.println(response.body());
+                if (response.statusCode() == 403) {
+                    JOptionPane.showMessageDialog(this, "Forbidden access");
+                    return;
+                }
+                else if(response.statusCode() == 200){
+                    System.out.println(response.body());
+                }
+                else{
+                    JOptionPane.showMessageDialog(this, "Unknown user");
+                    return;
+                }
             } catch (Exception ex){
                 System.err.println(ex);
             }

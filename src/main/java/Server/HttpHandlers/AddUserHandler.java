@@ -4,6 +4,7 @@ import Server.DatabaseManager;
 import Server.Policy;
 import Server.Role;
 import Server.User;
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import lombok.AllArgsConstructor;

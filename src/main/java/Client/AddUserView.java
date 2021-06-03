@@ -17,6 +17,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Optional;
 
 public class AddUserView extends JFrame implements ActionListener {
     private Container container = new Container();
@@ -36,9 +37,11 @@ public class AddUserView extends JFrame implements ActionListener {
 
     private HttpClient client;
     private String key;
+    private GalleryView parent;
 
-    public AddUserView(String key) throws HeadlessException {
+    public AddUserView(String key, GalleryView parent) throws HeadlessException {
         this.key = key;
+        this.parent = parent;
 
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -105,21 +108,32 @@ public class AddUserView extends JFrame implements ActionListener {
             JSONObject json = prepareJSON(username, hashedPassword);
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI("http://localhost:8080/addUser"))
-                    .headers("Content-Type", "application/json;charset=UTF-8")
+                    .header("Content-Type", "application/json;charset=UTF-8")
+                    .header("Authorization", "Bearer " + key)
                     .POST(HttpRequest.BodyPublishers.ofString(json.toString()))
                     .build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            String answer = response.body();
-            if(answer.equals("ok")){
-                JOptionPane.showMessageDialog(this, "User added");
+
+            if(response.statusCode() == 403) {
+                JOptionPane.showMessageDialog(this, "Forbidden access");
+                return;
             }
-            else if(answer.equals("user already exist")){
-                JOptionPane.showMessageDialog(this, "Username already exist");
+            else if(response.statusCode() == 200) {
+                String answer = response.body();
+                Optional<String> newToken = response.headers().firstValue("Token");
+                newToken.ifPresent(this::updateToken);
+                if (answer.equals("ok")) {
+                    JOptionPane.showMessageDialog(this, "User added");
+                } else if (answer.equals("user already exist")) {
+                    JOptionPane.showMessageDialog(this, "Username already exist");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Other error");
+                }
             }
             else{
-                JOptionPane.showMessageDialog(this, "Other error");
+                JOptionPane.showMessageDialog(this, "Unknown error");
+                return;
             }
-
         }catch (JSONException ex){
             System.err.println(ex);
             return;
@@ -147,6 +161,11 @@ public class AddUserView extends JFrame implements ActionListener {
                 .put("policy3", policy3Checkbox.isSelected())
                 .put("policy4", policy4Checkbox.isSelected())
                 .put("policy5", policy5Checkbox.isSelected());
+    }
+
+    private void updateToken(String token){
+        this.key = token;
+        parent.updateToken(token);
     }
 
     @Override
