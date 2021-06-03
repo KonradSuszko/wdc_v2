@@ -25,7 +25,7 @@ import java.util.Optional;
 
 public class GalleryView extends JFrame implements ActionListener {
     private static final int WIDTH = 300;
-    private static final int HEIGHT = 360;
+    private static final int HEIGHT = 256;
 
     private HttpClient client;
     private String key;
@@ -94,55 +94,26 @@ public class GalleryView extends JFrame implements ActionListener {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI("http://localhost:8080/getImages"))
                     .header("Content-Type", "application/json;charset=UTF-8")
-                    .header("Authorization", "Bearer " + key)
-                    .GET()
+                    .POST(HttpRequest.BodyPublishers.ofString(key))
                     .build();
             HttpResponse<byte[]> response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
-
-            if(response.statusCode() == 403){
-                JOptionPane.showMessageDialog(this, "Forbidden access");
-                return result;
-            }
-            else if(response.statusCode() == 200) {
-                Optional<String> newToken = response.headers().firstValue("Token");
-                newToken.ifPresent(this::updateToken);
-                Integer n = ByteBuffer.wrap(response.body()).getInt();
-                for (Integer i = 0; i < n; i++) {
-                    HttpRequest tmpReq = HttpRequest.newBuilder()
-                            .uri(new URI("http://localhost:8080/getSingleImage?i=" + i.toString()))
-                            .header("Content-Type", "application/json;charset=UTF-8")
-                            .header("Authorization", "Bearer " + key)
-                            .GET()
-                            .build();
-                    HttpResponse<byte[]> tmpResponse = HttpClient.newBuilder()
-                            .connectTimeout(Duration.ofSeconds(15))
-                            .proxy(ProxySelector.of(new InetSocketAddress(8080)))
-                            .build()
-                            .send(tmpReq, HttpResponse.BodyHandlers.ofByteArray());
-
-                    if(tmpResponse.statusCode() == 403){
-                        JOptionPane.showMessageDialog(this, "Forbidden access");
-                        break;
-                    }
-                    else if(tmpResponse.statusCode() == 200){
-                        newToken = response.headers().firstValue("Token");
-                        newToken.ifPresent(this::updateToken);
-                        result.add(tmpResponse.body());
-                    }
-                    else{
-                        JOptionPane.showMessageDialog(this, "Forbidden access");
-                        break;
-                    }
-                }
-            }
-            else{
-                JOptionPane.showMessageDialog(this, "Unknown error");
-                return result;
+            Integer n = ByteBuffer.wrap(response.body()).getInt();
+            for (Integer i = 0; i < n; i++) {
+                HttpRequest tmpReq = HttpRequest.newBuilder()
+                        .uri(new URI("http://localhost:8080/getSingleImage?i=" + i.toString()))
+                        .header("Content-Type", "application/json;charset=UTF-8")
+                        .GET()
+                        .build();
+                HttpResponse<byte[]> tmpResponse = HttpClient.newBuilder()
+                        .connectTimeout(Duration.ofSeconds(15))
+                        .proxy(ProxySelector.of(new InetSocketAddress(8080)))
+                        .build()
+                        .send(tmpReq, HttpResponse.BodyHandlers.ofByteArray());
+                result.add(tmpResponse.body());
             }
         } catch (URISyntaxException | IOException | InterruptedException e){
             System.err.println(e);
         }
-
         return result;
     }
 
@@ -179,12 +150,12 @@ public class GalleryView extends JFrame implements ActionListener {
         if(index == -1){
             return;
         }
-        dm.remove(index);
+
         try{
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI("http://localhost:8080/deleteImage?index=" + index.toString()))
                     .header("Content-Type", "application/json;charset=UTF-8")
-                    .header("Authorization", "Bearer " + key)
+                    .header("Token", key)
                     .GET()
                     .build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -193,6 +164,12 @@ public class GalleryView extends JFrame implements ActionListener {
                 this.key = newToken.get();
             }
             System.out.println(response.body());
+            String answer = response.body();
+            if(answer.equals("ok"))
+                dm.remove(index);
+            else if(answer.equals("Access denied")){
+                // access denied error 403
+            }
         } catch (Exception ex){
             System.err.println(ex);
         }
@@ -221,14 +198,9 @@ public class GalleryView extends JFrame implements ActionListener {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI("http://localhost:8080/sendImage"))
                     .header("Content-Type", "image/" + extension)
-                    .header("Authorization", "Bearer " + key)
                     .POST(HttpRequest.BodyPublishers.ofFile(file.toPath()))
                     .build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            Optional<String> newToken = response.headers().firstValue("Token");
-            if(newToken.isPresent()){
-                this.key = newToken.get();
-            }
             System.out.println(response.body());
             imageIcons.add(new ImageIcon(changeImageSize(ImageIO.read(file))));
             dm.add(imageIcons.size() - 1, imageIcons.get(imageIcons.size() - 1));
@@ -238,15 +210,11 @@ public class GalleryView extends JFrame implements ActionListener {
     }
 
     private void proceedBrowse(){
-        new BrowseUsersView(key, this);
+        new BrowseUsersView(key);
     }
 
     private void proceedAdd(){
-        new AddUserView(key, this);
-    }
-
-    public void updateToken(String token){
-        this.key = token;
+        new AddUserView(key);
     }
 
 
