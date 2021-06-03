@@ -114,7 +114,7 @@ public class LoginView extends JFrame implements ActionListener {
     private void initGallery(String key){
         GalleryView galleryView = new GalleryView(key);
 
-        galleryView.setSize(500, 450);
+        galleryView.setSize(700, 750);
         galleryView.setVisible(true);
         galleryView.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         galleryView.setLocationRelativeTo(null);

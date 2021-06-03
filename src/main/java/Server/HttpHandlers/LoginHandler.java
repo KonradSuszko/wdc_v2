@@ -17,6 +17,7 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class LoginHandler implements HttpHandler {
@@ -38,11 +39,19 @@ public class LoginHandler implements HttpHandler {
             String username = loginData.getString("username");
             String hashedPassword = loginData.getString("password");
             String response;
-            User user;
-            try {
-                user = manager.findByUsername(username);
-            } catch (NullPointerException e){
-                user = null;
+//            User user;
+//            try {
+//                user = manager.findByUsername(username);
+//            } catch (NullPointerException e){
+//                user = null;
+//            }
+            User user = null;
+            List<User> users = manager.findAll();
+            for(User u: users){
+                if(u.getUsername().equals(username)){
+                    user = u;
+                    break;
+                }
             }
             if(user == null){
                 response = "user not found";

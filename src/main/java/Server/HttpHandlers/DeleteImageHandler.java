@@ -39,7 +39,7 @@ public class DeleteImageHandler implements HttpHandler {
         InputStream inputStream = exchange.getRequestBody();
         Headers headers = exchange.getRequestHeaders();
         //String requestBody = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-        String token = headers.getFirst("Token");
+        String token = headers.getFirst("Authorization").split(" ")[1];
         System.out.println("request: " + token);
         Jws<Claims> result = Jwts.parser()
                 .setSigningKey(TextCodec.BASE64.encode(SECRET))
@@ -51,6 +51,9 @@ public class DeleteImageHandler implements HttpHandler {
         List<User> users = dm.findAll();
         User user = users.get(0);
         for (User u : users){
+            if(u.getLastToken() == null){
+                continue;
+            }
             if (u.getLastToken().equals(token)) {
                 user = u;
                 break;

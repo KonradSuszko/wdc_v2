@@ -130,7 +130,7 @@ public class GalleryView extends JFrame implements ActionListener {
                         result.add(tmpResponse.body());
                     }
                     else{
-                        JOptionPane.showMessageDialog(this, "Forbidden access");
+                        JOptionPane.showMessageDialog(this, "Unknown error");
                         break;
                     }
                 }
@@ -184,21 +184,22 @@ public class GalleryView extends JFrame implements ActionListener {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI("http://localhost:8080/deleteImage?index=" + index.toString()))
                     .header("Content-Type", "application/json;charset=UTF-8")
-                    .header("Token", key)
+                    .header("Authorization","Bearer " + key)
                     .GET()
                     .build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            Optional<String> newToken = response.headers().firstValue("Token");
-            if(newToken.isPresent()){
-                this.key = newToken.get();
+            if(response.statusCode() == 403) {
+                JOptionPane.showMessageDialog(this, "Forbidden access");
+                return;
+            }
+            else if(response.statusCode() == 200){
+                dm.remove(index);
+            }
+            else{
+                JOptionPane.showMessageDialog(this, "Unknown error");
+                return;
             }
             System.out.println(response.body());
-            String answer = response.body();
-            if(answer.equals("ok"))
-                dm.remove(index);
-            else if(answer.equals("Access denied")){
-                // access denied error 403
-            }
         } catch (Exception ex){
             System.err.println(ex);
         }
