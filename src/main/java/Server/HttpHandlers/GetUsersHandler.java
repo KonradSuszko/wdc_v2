@@ -1,46 +1,81 @@
 package Server.HttpHandlers;
 
 import Server.DatabaseManager;
+import Server.ResponsesManager;
+import Server.Role;
 import Server.User;
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.impl.TextCodec;
 import lombok.AllArgsConstructor;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @AllArgsConstructor
 public class GetUsersHandler implements HttpHandler {
     DatabaseManager dm;
+    private static final String SECRET = "siema";
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        System.out.println("Handling getUsers");
-        List<User> users= dm.findAll();
-        System.out.println("Got users from database");
-        Integer n = users.size();
-        byte[] bytes = ByteBuffer.allocate(4).putInt(n).array();
-        List<byte[]> toSend = new ArrayList<>();
-        long len = bytes.length;
-        toSend.add(bytes);
+        Headers headers = exchange.getRequestHeaders();
+        String token = headers.getFirst("Authorization").split(" ")[1];
+        Jws<Claims> result = Jwts.parser()
+                .setSigningKey(TextCodec.BASE64.encode(SECRET))
+                .parseClaimsJws(token);
+        List<User> users = dm.findAll();
+        User userFound = users.get(0);
         for (User u : users){
-            int id = u.getId();
-            len += ByteBuffer.allocate(4).putInt(id).array().length;
-            toSend.add(ByteBuffer.allocate(4).putInt(id).array());
+            if(u.getLastToken() == null){
+                continue;
+            }
+            if (u.getLastToken().equals(token)) {
+                userFound = u;
+                break;
+            }
         }
-        byte[] bytesToSend = new byte[4 * toSend.size()];
-        for(int i = 0; i < toSend.size(); i++){
-            bytesToSend[4*i] = toSend.get(i)[0];
-            bytesToSend[4*i + 1] = toSend.get(i)[1];
-            bytesToSend[4*i + 2] = toSend.get(i)[2];
-            bytesToSend[4*i + 3] = toSend.get(i)[3];
+        if(new Date().after(result.getBody().get("exp", Date.class))){
+            // expired
+            ResponsesManager.TokenExpiredResponse(userFound, dm, exchange);
         }
-        OutputStream os = exchange.getResponseBody();
-        exchange.sendResponseHeaders(200, bytesToSend.length);
-        os.write(bytesToSend);
-        System.out.println("Bytes sent");
-        os.close();
+        else if(userFound.getRole() == Role.ADMIN) {
+            System.out.println("Handling getUsers");
+            System.out.println("Got users from database");
+            Integer n = users.size();
+            byte[] bytes = ByteBuffer.allocate(4).putInt(n).array();
+            List<byte[]> toSend = new ArrayList<>();
+            long len = bytes.length;
+            toSend.add(bytes);
+            for (User u : users){
+                int id = u.getId();
+                len += ByteBuffer.allocate(4).putInt(id).array().length;
+                toSend.add(ByteBuffer.allocate(4).putInt(id).array());
+            }
+            byte[] bytesToSend = new byte[4 * toSend.size()];
+            for(int i = 0; i < toSend.size(); i++){
+                bytesToSend[4*i] = toSend.get(i)[0];
+                bytesToSend[4*i + 1] = toSend.get(i)[1];
+                bytesToSend[4*i + 2] = toSend.get(i)[2];
+                bytesToSend[4*i + 3] = toSend.get(i)[3];
+            }
+            OutputStream os = exchange.getResponseBody();
+            exchange.sendResponseHeaders(200, bytesToSend.length);
+            os.write(bytesToSend);
+            System.out.println("Bytes sent");
+            os.close();
+        }
+        else{
+            ResponsesManager.AccessDeniedResponse(exchange);
+        }
+
     }
 }

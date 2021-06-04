@@ -188,6 +188,10 @@ public class GalleryView extends JFrame implements ActionListener {
                     .GET()
                     .build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            Optional<String> newToken = response.headers().firstValue("Token");
+            if(newToken.isPresent()){
+                this.key = newToken.get();
+            }
             if(response.statusCode() == 403) {
                 JOptionPane.showMessageDialog(this, "Forbidden access");
                 return;
@@ -236,9 +240,19 @@ public class GalleryView extends JFrame implements ActionListener {
             if(newToken.isPresent()){
                 this.key = newToken.get();
             }
-            System.out.println(response.body());
-            imageIcons.add(new ImageIcon(changeImageSize(ImageIO.read(file))));
-            dm.add(imageIcons.size() - 1, imageIcons.get(imageIcons.size() - 1));
+            if(response.statusCode() == 403) {
+                JOptionPane.showMessageDialog(this, "Forbidden access");
+                return;
+            }
+            else if(response.statusCode() == 200){
+                System.out.println(response.body());
+                imageIcons.add(new ImageIcon(changeImageSize(ImageIO.read(file))));
+                dm.add(imageIcons.size() - 1, imageIcons.get(imageIcons.size() - 1));
+            }
+            else{
+                JOptionPane.showMessageDialog(this, "Unknown error");
+                return;
+            }
         } catch (IOException | URISyntaxException | InterruptedException ex){
             System.err.println(ex);
         }
