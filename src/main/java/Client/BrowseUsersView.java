@@ -44,14 +44,16 @@ public class BrowseUsersView extends JFrame implements ActionListener {
                 .build();
 
         this.combinedStrings = getUsers();
-        setLocationAndSize();
-        addAction();
-        jList.setModel(dm);
-        dm.addAll(combinedStrings);
-        setLocationAndSize();
-        scrollPane.setViewportView(jList);
-        add(deleteButton);
-        add(scrollPane);
+        if(!combinedStrings.isEmpty()) {
+            setLocationAndSize();
+            addAction();
+            jList.setModel(dm);
+            dm.addAll(combinedStrings);
+            setLocationAndSize();
+            scrollPane.setViewportView(jList);
+            add(deleteButton);
+            add(scrollPane);
+        }
     }
 
     private void setLocationAndSize(){
@@ -77,6 +79,7 @@ public class BrowseUsersView extends JFrame implements ActionListener {
             HttpResponse<byte[]> response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
             if(response.statusCode() == 403) {
                 JOptionPane.showMessageDialog(this, "Forbidden access");
+                dispose();
                 return result;
             }
             else if (response.statusCode() == 200) {
@@ -111,6 +114,7 @@ public class BrowseUsersView extends JFrame implements ActionListener {
 
                     if (response.statusCode() == 403) {
                         JOptionPane.showMessageDialog(this, "Forbidden access");
+                        dispose();
                         break;
                     } else if (response.statusCode() == 200) {
                         newToken = response.headers().firstValue("Token");

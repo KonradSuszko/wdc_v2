@@ -1,9 +1,6 @@
 package Server.HttpHandlers;
 
-import Server.DatabaseManager;
-import Server.ResourcesManager;
-import Server.Role;
-import Server.User;
+import Server.*;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -36,7 +33,6 @@ public class DeleteImageHandler implements HttpHandler {
         resourcesManager.updateList();
         List<File> files = resourcesManager.getFileList();
         String query = exchange.getRequestURI().getQuery();
-        InputStream inputStream = exchange.getRequestBody();
         Headers headers = exchange.getRequestHeaders();
         //String requestBody = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         String token = headers.getFirst("Authorization").split(" ")[1];
@@ -61,31 +57,17 @@ public class DeleteImageHandler implements HttpHandler {
         }
         if(new Date().after(result.getBody().get("exp", Date.class))){
             // expired
-            //User user = dm.findByToken(token);
-            int id = user.getId();
-            System.out.println(id);
-            dm.nullToken(id);
-            System.out.println("token nullified");
-            String response = "Access denied";
-            exchange.sendResponseHeaders(403, response.getBytes(StandardCharsets.UTF_8).length);
-            exchange.getResponseBody().write(response.getBytes(StandardCharsets.UTF_8));
-            exchange.getResponseBody().close();
+            ResponsesManager.TokenExpiredResponse(user, dm, exchange);
         }
         else if(user.getRole() != Role.USER) {
             String[] e = query.split("=");
             Integer index = Integer.parseInt(e[1]);
             System.out.println(index);
             resourcesManager.deleteFile(index);
-            String response = "ok";
-            exchange.sendResponseHeaders(200, response.getBytes(StandardCharsets.UTF_8).length);
-            exchange.getResponseBody().write(response.getBytes(StandardCharsets.UTF_8));
-            exchange.getResponseBody().close();
+            ResponsesManager.OkResponse(exchange);
         }
         else{
-            String response = "Access denied";
-            exchange.sendResponseHeaders(403, response.getBytes(StandardCharsets.UTF_8).length);
-            exchange.getResponseBody().write(response.getBytes(StandardCharsets.UTF_8));
-            exchange.getResponseBody().close();
+            ResponsesManager.AccessDeniedResponse(exchange);
         }
     }
 }
