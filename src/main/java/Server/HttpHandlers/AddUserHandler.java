@@ -22,10 +22,16 @@ import java.util.Date;
 import java.util.List;
 
 
-@AllArgsConstructor
 public class AddUserHandler implements HttpHandler {
     DatabaseManager dm;
     private static final String SECRET = "siema";
+    boolean rolesMode;
+    int policyRequired = 16;
+
+    public AddUserHandler(DatabaseManager dm, boolean rolesMode){
+        this.dm = dm;
+        this.rolesMode = rolesMode;
+    }
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -51,16 +57,16 @@ public class AddUserHandler implements HttpHandler {
             // expired
             ResponsesManager.TokenExpiredResponse(foundUser, dm, exchange);
         }
-        else if(foundUser.getRole() == Role.ADMIN) {
+        else if((rolesMode && (foundUser.getRole() == Role.ADMIN))  ||
+                (!rolesMode && (foundUser.getPolicy() % (policyRequired*2) >= policyRequired))) {
             try{
                 JSONTokener tokener = new JSONTokener(tmp);
                 JSONObject json = new JSONObject(tokener);
                 String username = json.getString("username");
                 String password = json.getString("password");
                 List<Role> roles = generateListOfRoles(json);
-                List<Policy> policies = generateListOfPolicies(json);
+                int policy = generatePolicy(json);
                 Role role = highestRole(json);
-                Policy policy = highestPolicy(json);
                 User user = new User(username, password, role, policy);
                 System.out.println(user);
                 //User existent = dm.findByUsername(user.getUsername());
@@ -126,23 +132,28 @@ public class AddUserHandler implements HttpHandler {
             return Policy.AccessLevel1;
         return null;
     }
-    private List<Policy> generateListOfPolicies(JSONObject json) throws JSONException {
-        List<Policy> result = new ArrayList<>();
-
+    private int generatePolicy(JSONObject json) throws JSONException {
+        //List<Policy> result = new ArrayList<>();
+        int result = 0;
         if(json.getBoolean("policy1")){
-            result.add(Policy.AccessLevel1);
+            //result.add(Policy.AccessLevel1);
+            result += 1;
         }
         if(json.getBoolean("policy2")){
-            result.add(Policy.AccessLevel2);
+            //result.add(Policy.AccessLevel2);
+            result += 2;
         }
         if(json.getBoolean("policy3")){
-            result.add(Policy.AccessLevel3);
+            //result.add(Policy.AccessLevel3);
+            result += 4;
         }
         if(json.getBoolean("policy4")){
-            result.add(Policy.AccessLevel4);
+            //result.add(Policy.AccessLevel4);
+            result += 8;
         }
         if(json.getBoolean("policy5")){
-            result.add(Policy.AccessLevel5);
+            //result.add(Policy.AccessLevel5);
+            result += 16;
         }
         return result;
     }

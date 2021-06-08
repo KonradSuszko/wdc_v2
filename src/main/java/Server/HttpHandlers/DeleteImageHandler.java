@@ -22,10 +22,13 @@ import java.lang.Object.*;
 public class DeleteImageHandler implements HttpHandler {
     ResourcesManager resourcesManager;
     DatabaseManager dm;
+    boolean rolesMode;
+    int policyRequired = 4;
     private static final String SECRET = "siema";
-    public DeleteImageHandler(ResourcesManager manager, DatabaseManager dm) {
+    public DeleteImageHandler(ResourcesManager manager, DatabaseManager dm, boolean rolesMode) {
         this.resourcesManager = manager;
         this.dm = dm;
+        this.rolesMode = rolesMode;
     }
 
     @Override
@@ -59,7 +62,8 @@ public class DeleteImageHandler implements HttpHandler {
             // expired
             ResponsesManager.TokenExpiredResponse(user, dm, exchange);
         }
-        else if(user.getRole() != Role.USER) {
+        else if((rolesMode && (user.getRole() != Role.USER))  ||
+                (!rolesMode && (user.getPolicy() % (policyRequired*2) >= policyRequired))) {
             String[] e = query.split("=");
             Integer index = Integer.parseInt(e[1]);
             System.out.println(index);

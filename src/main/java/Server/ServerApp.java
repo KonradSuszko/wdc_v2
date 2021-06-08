@@ -10,20 +10,20 @@ import java.net.InetSocketAddress;
 public class ServerApp {
     public static void main(String[] args){
         try {
-            boolean rolesMode = true;
+            boolean rolesMode = false;
             HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
             DatabaseManager dm = new DatabaseManager(Persistence.createEntityManagerFactory("testPU"), User.class);
             ResourcesManager rm = new ResourcesManager();
             dm.generateSampleData();
-            server.createContext("/login", new LoginHandler(dm));
-            server.createContext("/getImages", new GetImagesHandler(rm));
-            server.createContext("/getSingleImage", new GetSingleImageHandler(rm));
-            server.createContext("/deleteImage", new DeleteImageHandler(rm, dm));
-            server.createContext("/sendImage", new SendImageHandler(rm, dm));
-            server.createContext("/getUsers", new GetUsersHandler(dm));
-            server.createContext("/getSingleUser", new GetSingleUserHandler(dm));
-            server.createContext("/deleteUser", new DeleteUserHandler(dm));
-            server.createContext("/addUser", new AddUserHandler(dm));
+            server.createContext("/login", new LoginHandler(dm, rolesMode));
+            server.createContext("/getImages", new GetImagesHandler(rm, dm, rolesMode));
+            server.createContext("/getSingleImage", new GetSingleImageHandler(rm, rolesMode));
+            server.createContext("/deleteImage", new DeleteImageHandler(rm, dm, rolesMode));
+            server.createContext("/sendImage", new SendImageHandler(rm, dm, rolesMode));
+            server.createContext("/getUsers", new GetUsersHandler(dm, rolesMode));
+            server.createContext("/getSingleUser", new GetSingleUserHandler(dm, rolesMode));
+            server.createContext("/deleteUser", new DeleteUserHandler(dm, rolesMode));
+            server.createContext("/addUser", new AddUserHandler(dm, rolesMode));
             server.setExecutor(null);
             System.out.println("Starting...");
             server.start();

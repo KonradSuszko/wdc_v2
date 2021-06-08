@@ -15,7 +15,7 @@ import java.nio.charset.StandardCharsets;
 @AllArgsConstructor
 public class GetSingleUserHandler implements HttpHandler {
     DatabaseManager dm;
-
+    boolean rolesMode;
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         String query = exchange.getRequestURI().getQuery();

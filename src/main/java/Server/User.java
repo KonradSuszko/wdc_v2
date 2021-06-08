@@ -23,11 +23,11 @@ public class User {
 
     private Role role;
 
-    private Policy policy;
+    private int policy;
 
     private String lastToken;
 
-    public User(String username, String hashedPassword, Role role, Policy policy) {
+    public User(String username, String hashedPassword, Role role, int policy) {
         this.username = username;
         this.hashedPassword = hashedPassword;
         this.role = role;

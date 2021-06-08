@@ -21,10 +21,11 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class LoginHandler implements HttpHandler {
-    public LoginHandler(DatabaseManager manager) {
+    public LoginHandler(DatabaseManager manager, boolean rolesMode) {
         this.manager = manager;
+        this.rolesMode = rolesMode;
     }
-
+    boolean rolesMode;
     DatabaseManager manager;
 
     private static final String SECRET = "siema";

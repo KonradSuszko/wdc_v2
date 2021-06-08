@@ -13,9 +13,10 @@ import java.nio.charset.StandardCharsets;
 
 public class LogoutHandler implements HttpHandler {
     DatabaseManager databaseManager;
-
-    public LogoutHandler(DatabaseManager databaseManager) {
+    boolean rolesMode;
+    public LogoutHandler(DatabaseManager databaseManager, boolean rolesMode) {
         this.databaseManager = databaseManager;
+        this.rolesMode = rolesMode;
     }
 
     @Override

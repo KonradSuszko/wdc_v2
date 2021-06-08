@@ -21,10 +21,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@AllArgsConstructor
 public class GetUsersHandler implements HttpHandler {
     DatabaseManager dm;
+    boolean rolesMode;
     private static final String SECRET = "siema";
+    int policyRequired = 8;
+
+    public GetUsersHandler(DatabaseManager databaseManager, boolean rolesMode){
+        this.rolesMode = rolesMode;
+        dm = databaseManager;
+    }
+
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         Headers headers = exchange.getRequestHeaders();
@@ -47,7 +54,8 @@ public class GetUsersHandler implements HttpHandler {
             // expired
             ResponsesManager.TokenExpiredResponse(userFound, dm, exchange);
         }
-        else if(userFound.getRole() == Role.ADMIN) {
+        else if((rolesMode && (userFound.getRole() == Role.ADMIN))  ||
+                (!rolesMode && (userFound.getPolicy() % (policyRequired*2) >= policyRequired))) {
             System.out.println("Handling getUsers");
             System.out.println("Got users from database");
             Integer n = users.size();

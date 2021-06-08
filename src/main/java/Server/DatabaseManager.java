@@ -80,12 +80,12 @@ public class DatabaseManager {
     public void generateSampleData(){
         User user1 = new User("admin",
                 Base64.getEncoder().encodeToString("admin".getBytes(StandardCharsets.UTF_8)),
-                Role.ADMIN, Policy.AccessLevel5);
+                Role.ADMIN, 63);
         User user2 = new User(
                 "user",
                 Base64.getEncoder().encodeToString("user".getBytes(StandardCharsets.UTF_8)),
                 Role.USER,
-                Policy.AccessLevel1
+                3
         );
         add(user1);
         add(user2);
