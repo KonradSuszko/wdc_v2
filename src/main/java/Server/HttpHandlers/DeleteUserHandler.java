@@ -20,11 +20,17 @@ import java.util.Date;
 import java.util.List;
 
 
-@AllArgsConstructor
 public class DeleteUserHandler implements HttpHandler {
     DatabaseManager dm;
     private static final String SECRET = "siema";
-    
+    boolean rolesMode;
+    int policyRequired = 32;
+
+    public DeleteUserHandler(DatabaseManager databaseManager, boolean rolesMode){
+        this.rolesMode = rolesMode;
+        dm = databaseManager;
+    }
+
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         InputStream inputStream = exchange.getRequestBody();
@@ -48,7 +54,8 @@ public class DeleteUserHandler implements HttpHandler {
             // expired
             ResponsesManager.TokenExpiredResponse(user, dm, exchange);
         }
-        else if(user.getRole() == Role.ADMIN) {
+        else if((rolesMode && (user.getRole() == Role.ADMIN))  ||
+                (!rolesMode && (user.getPolicy() % (policyRequired*2) >= policyRequired))) {
             String query = exchange.getRequestURI().getQuery();
             String[] e = query.split("=");
             Integer id = Integer.parseInt(e[1]);

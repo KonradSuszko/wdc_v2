@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 public class GetSingleImageHandler implements HttpHandler {
     ResourcesManager resourcesManager;
-
+    boolean rolesMode;
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         resourcesManager.updateList();
