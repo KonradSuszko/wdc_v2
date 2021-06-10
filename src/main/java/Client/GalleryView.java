@@ -203,7 +203,7 @@ public class GalleryView extends JFrame implements ActionListener {
                 JOptionPane.showMessageDialog(this, "Unknown error");
                 return;
             }
-            System.out.println(response.body());
+            //System.out.println(response.body());
         } catch (Exception ex){
             System.err.println(ex);
         }
@@ -225,7 +225,8 @@ public class GalleryView extends JFrame implements ActionListener {
             return;
         }
         if(!extension.equals("jpg") && !extension.equals("png")){
-            System.out.println("Bad format");
+            //System.out.println("Bad format");
+            JOptionPane.showMessageDialog(this, "Bad format");
             return;
         }
         try{
@@ -245,7 +246,7 @@ public class GalleryView extends JFrame implements ActionListener {
                 return;
             }
             else if(response.statusCode() == 200){
-                System.out.println(response.body());
+                //System.out.println(response.body());
                 imageIcons.add(new ImageIcon(changeImageSize(ImageIO.read(file))));
                 dm.add(imageIcons.size() - 1, imageIcons.get(imageIcons.size() - 1));
             }

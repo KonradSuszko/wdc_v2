@@ -181,7 +181,8 @@ public class BrowseUsersView extends JFrame implements ActionListener {
                     return;
                 }
                 else if(response.statusCode() == 200){
-                    System.out.println(response.body());
+                    //System.out.println(response.body());
+                    JOptionPane.showMessageDialog(this, "Deleted");
                 }
                 else{
                     JOptionPane.showMessageDialog(this, "Unknown user");

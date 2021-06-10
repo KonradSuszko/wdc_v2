@@ -24,7 +24,7 @@ import java.util.List;
 
 public class AddUserHandler implements HttpHandler {
     DatabaseManager dm;
-    private static final String SECRET = "siema";
+    private static final String SECRET = "secret";
     boolean rolesMode;
     int policyRequired = 16;
 
@@ -68,7 +68,7 @@ public class AddUserHandler implements HttpHandler {
                 int policy = generatePolicy(json);
                 Role role = highestRole(json);
                 User user = new User(username, password, role, policy);
-                System.out.println(user);
+                //System.out.println(user);
                 //User existent = dm.findByUsername(user.getUsername());
                 List<User> users = dm.findAll();
                 boolean exists = false;
@@ -84,7 +84,7 @@ public class AddUserHandler implements HttpHandler {
                 else
                     dm.add(user);
                 //String response = "ok";
-                ResponsesManager.OkResponse(exchange);
+                ResponsesManager.OkResponse(exchange, user);
                 inputStream.close();
 
             } catch (JSONException ex){

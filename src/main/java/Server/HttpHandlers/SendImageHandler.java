@@ -10,7 +10,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.impl.TextCodec;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 
@@ -18,7 +17,7 @@ public class SendImageHandler implements HttpHandler {
     ResourcesManager resourcesManager;
     DatabaseManager dm;
     boolean rolesMode;
-    private static final String SECRET = "siema";
+    private static final String SECRET = "secret";
     int policyRequired = 2;
 
     public SendImageHandler(ResourcesManager manager, DatabaseManager dm, boolean rolesMode) {
@@ -30,7 +29,7 @@ public class SendImageHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         //resourcesManager.updateList();
-        System.out.println("saving new file");
+        //System.out.println("saving new file");
         InputStream inputStream = exchange.getRequestBody();
         Headers headers = exchange.getRequestHeaders();
         String token = headers.getFirst("Authorization").split(" ")[1];
@@ -57,7 +56,7 @@ public class SendImageHandler implements HttpHandler {
             byte[] fileInBytes = inputStream.readAllBytes();
             resourcesManager.saveFile(fileInBytes);
             resourcesManager.updateList();
-            ResponsesManager.OkResponse(exchange);
+            ResponsesManager.OkResponse(exchange, user);
         }
         else{
             ResponsesManager.AccessDeniedResponse(exchange);

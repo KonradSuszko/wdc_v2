@@ -24,7 +24,7 @@ public class DeleteImageHandler implements HttpHandler {
     DatabaseManager dm;
     boolean rolesMode;
     int policyRequired = 4;
-    private static final String SECRET = "siema";
+    private static final String SECRET = "secret";
     public DeleteImageHandler(ResourcesManager manager, DatabaseManager dm, boolean rolesMode) {
         this.resourcesManager = manager;
         this.dm = dm;
@@ -39,13 +39,13 @@ public class DeleteImageHandler implements HttpHandler {
         Headers headers = exchange.getRequestHeaders();
         //String requestBody = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         String token = headers.getFirst("Authorization").split(" ")[1];
-        System.out.println("request: " + token);
+        //System.out.println("request: " + token);
         Jws<Claims> result = Jwts.parser()
                 .setSigningKey(TextCodec.BASE64.encode(SECRET))
                 .parseClaimsJws(token);
-        System.out.println("result: " + result);
-        System.out.println(result.getBody().get("exp", Date.class));
-        System.out.println(new Date());
+        //System.out.println("result: " + result);
+        //System.out.println(result.getBody().get("exp", Date.class));
+        //System.out.println(new Date());
 
         List<User> users = dm.findAll();
         User user = users.get(0);
@@ -66,9 +66,9 @@ public class DeleteImageHandler implements HttpHandler {
                 (!rolesMode && (user.getPolicy() % (policyRequired*2) >= policyRequired))) {
             String[] e = query.split("=");
             Integer index = Integer.parseInt(e[1]);
-            System.out.println(index);
+            //System.out.println(index);
             resourcesManager.deleteFile(index);
-            ResponsesManager.OkResponse(exchange);
+            ResponsesManager.OkResponse(exchange, user);
         }
         else{
             ResponsesManager.AccessDeniedResponse(exchange);

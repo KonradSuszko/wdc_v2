@@ -28,10 +28,10 @@ public class LoginHandler implements HttpHandler {
     boolean rolesMode;
     DatabaseManager manager;
 
-    private static final String SECRET = "siema";
+    private static final String SECRET = "secret";
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        System.out.println("New login request");
+        //System.out.println("New login request");
         InputStream inputStream = exchange.getRequestBody();
         String requestBody = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         try {
@@ -63,9 +63,9 @@ public class LoginHandler implements HttpHandler {
                         .setId(username)
                         .setIssuedAt(now)
                         .setExpiration(Date.from(Instant.ofEpochMilli(now.getTime() + TimeUnit.HOURS.toMillis(2))))
-                        .signWith(SignatureAlgorithm.HS256, TextCodec.BASE64.encode(SECRET)) //decode?
+                        .signWith(SignatureAlgorithm.HS256, TextCodec.BASE64.encode(SECRET))
                         .compact();
-                System.out.println(jws);
+                //System.out.println(jws);
                 manager.updateToken(user.getId(), jws);
                 response = jws;
             }
@@ -73,7 +73,7 @@ public class LoginHandler implements HttpHandler {
                 response = "bad password";
             }
             exchange.sendResponseHeaders(200, response.getBytes(StandardCharsets.UTF_8).length);
-            System.out.println(response);
+            //System.out.println(response);
             OutputStream os = exchange.getResponseBody();
             os.write(response.getBytes(StandardCharsets.UTF_8));
             os.close();

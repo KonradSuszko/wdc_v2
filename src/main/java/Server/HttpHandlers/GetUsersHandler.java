@@ -24,7 +24,7 @@ import java.util.List;
 public class GetUsersHandler implements HttpHandler {
     DatabaseManager dm;
     boolean rolesMode;
-    private static final String SECRET = "siema";
+    private static final String SECRET = "secret";
     int policyRequired = 8;
 
     public GetUsersHandler(DatabaseManager databaseManager, boolean rolesMode){
@@ -56,8 +56,8 @@ public class GetUsersHandler implements HttpHandler {
         }
         else if((rolesMode && (userFound.getRole() == Role.ADMIN))  ||
                 (!rolesMode && (userFound.getPolicy() % (policyRequired*2) >= policyRequired))) {
-            System.out.println("Handling getUsers");
-            System.out.println("Got users from database");
+            //System.out.println("Handling getUsers");
+            //System.out.println("Got users from database");
             Integer n = users.size();
             byte[] bytes = ByteBuffer.allocate(4).putInt(n).array();
             List<byte[]> toSend = new ArrayList<>();
@@ -78,7 +78,7 @@ public class GetUsersHandler implements HttpHandler {
             OutputStream os = exchange.getResponseBody();
             exchange.sendResponseHeaders(200, bytesToSend.length);
             os.write(bytesToSend);
-            System.out.println("Bytes sent");
+            //System.out.println("Bytes sent");
             os.close();
         }
         else{

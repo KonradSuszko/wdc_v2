@@ -21,7 +21,7 @@ public class GetImagesHandler implements HttpHandler {
     ResourcesManager resourcesManager;
     boolean rolesMode;
     DatabaseManager dm;
-    private static final String SECRET = "siema";
+    private static final String SECRET = "secret";
     int policyRequired = 1;
 
     public GetImagesHandler(ResourcesManager manager , DatabaseManager dataBaseManager, boolean rolesMode) {
@@ -48,7 +48,7 @@ public class GetImagesHandler implements HttpHandler {
                 user = u;
                 break;
             }
-        System.out.println("policy: " + user.getPolicy()) ;
+        //System.out.println("policy: " + user.getPolicy()) ;
         }
         if(new Date().after(result.getBody().get("exp", Date.class))){
             // expired

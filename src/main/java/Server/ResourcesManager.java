@@ -34,7 +34,7 @@ public class ResourcesManager {
         try{
             String newName = getRandomString(10);
             newName += ".jpg";
-            System.out.println(FOLDER.getAbsolutePath() + "\\" + newName);
+            //System.out.println(FOLDER.getAbsolutePath() + "\\" + newName);
             File file = new File(FOLDER.getAbsolutePath() + "\\" + newName);
             file.createNewFile();
             FileOutputStream fos = new FileOutputStream(file);

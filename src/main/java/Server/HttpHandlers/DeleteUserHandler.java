@@ -22,7 +22,7 @@ import java.util.List;
 
 public class DeleteUserHandler implements HttpHandler {
     DatabaseManager dm;
-    private static final String SECRET = "siema";
+    private static final String SECRET = "secret";
     boolean rolesMode;
     int policyRequired = 32;
 
@@ -61,7 +61,7 @@ public class DeleteUserHandler implements HttpHandler {
             Integer id = Integer.parseInt(e[1]);
             user = dm.find(id);
             dm.delete(user);
-            ResponsesManager.OkResponse(exchange);
+            ResponsesManager.OkResponse(exchange, user);
         }
         else{
             ResponsesManager.AccessDeniedResponse(exchange);
